@@ -14,6 +14,7 @@ import ServiceClasses.CollectiveInterfaces.ObserverDirection;
 import ServiceClasses.CollectiveInterfaces.ObserverSize;
 import ServiceClasses.Direction;
 import ServiceClasses.ModelComponents.Model;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -42,7 +43,9 @@ public class PageView implements ObserverSize, ObservableSize, ObserverDirection
     private int maxLine;    //количество строк текста, содержащихся в модели
 
     private LinkedList<ArrayList<Glyph>> listPage;  //конструкция, в которую набираются строки для отрисовки
-    private Pane pane;      //Панель компоновки
+    private Group group;
+    private Canvas canvasApp;
+    private static GraphicsContext graphicsContextCanvasApp;
 
     private PageView() {
     }
@@ -51,11 +54,11 @@ public class PageView implements ObserverSize, ObservableSize, ObserverDirection
      * Конструктор класса
      * @param model ссылка на модель, которая предоставляет строки по запросу
      * @param scene этот параметр нужен для сбора ширины и высоты сцены
-     * @param pane панель компоновки, т.е. где размещать элементы в окне
+     * @param group родительский элемент
      * @param observableSize поставщик размеров окна (в данном случае контроллер)
      * @param observableDirection поставщик действий пользователя (в даддном случае контроллер)
      */
-    public PageView(Model model, Scene scene, Pane pane, ObservableSize observableSize,
+    public PageView(Model model, Scene scene, Group group, ObservableSize observableSize,
                     ObservableDirection observableDirection){
         observableSize.registerObserverSize(this);          //регистрируемся как наблюдатели размеров окна
         observableDirection.registerObserverDirection(this); //регистрируемся как наблюдатели действий пользователя
@@ -76,7 +79,9 @@ public class PageView implements ObserverSize, ObservableSize, ObserverDirection
         this.minLine = 0;                       //минимальный номер строки, другими словами 0
         this.maxLine = model.size();            //запрашиваем у модели количество строк
         this.listPage = new LinkedList<>();     //создаём коллекцию в которую будем набирать строки для отрисовки
-        this.pane = pane;                       //запоминаем панель компоновки
+        this.group = group;
+        this.canvasApp = new Canvas();
+        graphicsContextCanvasApp = this.canvasApp.getGraphicsContext2D();
         constructPage();                        //обращение к методу начала набора строк
         drawPage();                             //обращение к методу отрисовки набранных строк
     }
@@ -323,30 +328,29 @@ public class PageView implements ObserverSize, ObservableSize, ObserverDirection
      * После наполнения canvas укладываем в панель компоновки в нужной позиции.
      */
     public void drawPage(){
-        pane.getChildren().clear();
+        group.getChildren().clear();
+        this.canvasApp.setWidth(this.widthScene);
+        this.canvasApp.setHeight(this.heightScene);
+        graphicsContextCanvasApp.clearRect(0.0, 0.0, canvasApp.getWidth(), canvasApp.getHeight());
+
         ArrayList<ArrayList<Glyph>> listDraw = new ArrayList<>(this.listPage);
-        double panePosY = 0.0;
+        double shift = 0.0;
 
         for (int i = 0; i < listDraw.size(); i++) {
             ArrayList<Glyph> subListDraw = listDraw.get(i);
             double heightSubRow = getHeightList(subListDraw);
 
-            Canvas canvas = new Canvas(this.widthScene, heightSubRow);
-            GraphicsContext gc = canvas.getGraphicsContext2D();
-
-            double canvasPosY = heightSubRow * 0.75;
+            double canvasPosY = (heightSubRow * 0.75) + shift;
             double canvasPosX = 0.0;
 
             for (int j = 0; j < subListDraw.size(); j++) {
                 Glyph glyph = subListDraw.get(j);
-                gc.setFont(glyph.getFontGlyph());
-                gc.fillText(glyph.getValue(), canvasPosX, canvasPosY);
+                graphicsContextCanvasApp.setFont(glyph.getFontGlyph());
+                graphicsContextCanvasApp.fillText(glyph.getValue(), canvasPosX, canvasPosY);
                 canvasPosX += glyph.getWidth();
             }
-
-            pane.getChildren().add(canvas);
-            canvas.relocate(0.0, panePosY);
-            panePosY = panePosY + heightSubRow;
+            shift += heightSubRow;
         }
+        group.getChildren().add(this.canvasApp);
     }
 }

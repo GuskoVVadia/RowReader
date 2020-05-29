@@ -19,6 +19,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -39,14 +40,12 @@ public class Controller implements ObservableSize, ObservableDirection, AlertMes
     private static Stage primaryStage;  //контейнер верхнего уровня графического интерфейса пользователя. По сути
     //является "подмостками" для сцены.
     private static Scene primaryScene;  //контейнер графических элементов наполнения окна
+    public Group group;
 
     private LinkedList<ObserverSize> listObserversSize;         //лист наблюдателей размеров
     private LinkedList<ObserverDirection> listObserversDirection;   //лист наблюдателей действий пользователя
 
     private Direction currentStateDirection;    //текущее действие полльзователя
-
-    public Pane pane;       //панель-компоновщик для объектов класса Node, панель не несёт ответственность за
-    //расположение объектов внутри себя, но предоставляет возможность для абсолютного позиционирования дочерних элементов.
 
     private Path filePath;  //путь к файлу, необходимого для Модели программы
     private String encode;  //кодировка файла
@@ -65,7 +64,7 @@ public class Controller implements ObservableSize, ObservableDirection, AlertMes
     public void setStage(Stage stage){
         Controller.primaryStage = stage;
 
-        primaryScene = new Scene(pane, 1000.0, 500.0);
+        primaryScene = new Scene(group, 1000.0, 500.0);
         primaryStage.setScene(primaryScene);
 
         if (Objects.nonNull(exceptionFromMain)){
@@ -75,7 +74,7 @@ public class Controller implements ObservableSize, ObservableDirection, AlertMes
         if (Objects.isNull(exceptionFromMain)) {
             primaryStage.setTitle(filePath.getFileName().toString());
             Model model = new FileReadingModel(filePath, this, Charset.forName(encode));
-            PageView pageView = new PageView(model, primaryScene, pane, this, this);
+            PageView pageView = new PageView(model, primaryScene, group, this, this);
 
 
             //создаём массив и заполняем координаты точки
