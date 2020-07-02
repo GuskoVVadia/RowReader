@@ -72,10 +72,9 @@ public class Controller implements ObservableSize, ObservableDirection, AlertMes
         }
 
         if (Objects.isNull(exceptionFromMain)) {
-            primaryStage.setTitle(filePath.getFileName().toString());
+            primaryStage.setTitle("reader row");
             Model model = new FileReadingModel(filePath, this, Charset.forName(encode));
             PageView pageView = new PageView(model, primaryScene, group, this, this);
-
 
             //создаём массив и заполняем координаты точки
             BlockingQueue<Point2D> dimensionChangeQueue = new ArrayBlockingQueue<>(1);

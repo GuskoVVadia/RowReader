@@ -16,7 +16,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.nio.file.Path;
 
-
 public class Main extends Application {
 
     private static Stage primaryStage;
@@ -33,15 +32,17 @@ public class Main extends Application {
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("/sample.fxml"));
+        loader.setLocation(getClass().getResource("sample.fxml"));
         loader.load();
         Controller controller = loader.getController();
 
-            controller.setFilePath(filePath);
-            controller.setEncode(fileEncode);
-            controller.setException(exception);
-            controller.setStage(primaryStage);
-            primaryStage.show();
+
+        controller.setFilePath(filePath);
+        controller.setEncode(fileEncode);
+        controller.setException(exception);
+
+        controller.setStage(primaryStage);
+        primaryStage.show();
 
     }
 
@@ -49,19 +50,18 @@ public class Main extends Application {
      * данные полученные от пользователя инкапсулированы в массиве типа String.
      * для поиска файла и составления пути - ответственен класс FileFinder.
      * для определения кодировки, найденного файла - ответственнен класс TextDetector
-     * @param args
+     * @param args данные пользователя
      */
     public static void main(String[] args){
-
         exception = null;
         try {
             Main.filePath = new FileFinder().getPath(args);
-            TextDetector textDetector = new TextDetector();
-            Main.fileEncode = textDetector.findEncoding(Main.filePath);
+            Main.fileEncode = TextDetector.getCharset(Main.filePath).toString();
 
         }catch (Exception e){
             exception = e;
         }
+
         launch(args);
     }
 

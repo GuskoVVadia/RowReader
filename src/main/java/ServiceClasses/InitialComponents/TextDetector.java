@@ -1,14 +1,16 @@
 /**
- * Класс, реализующий алгоритм и классы по автоподбору кодировки текстового файла.
- * За основу взят более новый алгоритм от org.mozilla и класс UniversalDetector.
+ * Класс, реализующий автоопределение кодировки заданного файла.
+ * используется алгоритм Apache Any23.
  */
 
 package ServiceClasses.InitialComponents;
 
-import org.mozilla.universalchardet.UniversalDetector;
+import org.apache.any23.encoding.TikaEncodingDetector;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 
 public class TextDetector {
@@ -17,36 +19,15 @@ public class TextDetector {
     }
 
     /**
-     * Метод получает путь к файлу и запускает побайтовое чтение данных из файла.
-     * Чтение производится в массив buf, который передаётся в объект типа UniversalDetector для определения кодировки
-     * текстового файла.
-     * @param path путь к файлу
-     * @return кодировку файла в виде String
-     * @throws IOException ошбика доступа к файлу.
+     * Отдаём в метод путь к файлу - получаем кодировку файла.
+     * @param pathFile отдаём путь к файлу
+     * @return получаем кодировку
+     * @throws IOException ошибка при работе потоками байтов
      */
-    public String findEncoding(Path path) throws IOException {
-
-        byte[] buf = new byte[1_000];
-        String fileName = path.toString();
-        String encoding = null;
-
-        try (FileInputStream fileInputStream = new FileInputStream(fileName)) {
-
-            UniversalDetector detector = new UniversalDetector(null);
-
-            int nread;
-            while ((nread = fileInputStream.read(buf)) > 0 && !detector.isDone()) {
-                detector.handleData(buf, 0, nread);
-            }
-
-            detector.dataEnd();
-
-            encoding = detector.getDetectedCharset();
-        } catch (IOException e){
-            throw e;
+    public static Charset getCharset(Path pathFile) throws IOException {
+        try (InputStream is = new FileInputStream(pathFile.toString())){
+            return Charset.forName(new TikaEncodingDetector().guessEncoding(is));
         }
-        return encoding;
     }
-
 }
 
