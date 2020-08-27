@@ -35,7 +35,6 @@ public class PathFinder {
          * если получили имя файла - проверяем,
          * иначем - получили абсолютный путь - проверяем.
          */
-        //TODO будь внимателен к имени класс в поиске пути - pathDir
         if (!args[0].contains(File.separator)){
             Path pathDir = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
             Path pathUserFile = Paths.get(pathDir.toString() + File.separator + args[0]);

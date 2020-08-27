@@ -1,3 +1,6 @@
+/**
+ * Интерфейс слушателя размеров.
+ */
 package AppInterfaces;
 
 public interface ObserverSize {
